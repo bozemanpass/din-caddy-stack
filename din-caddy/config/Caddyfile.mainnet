@@ -1,0 +1,40 @@
+# Caddyfile for Din e2e testing
+{
+	debug
+}
+:8000 {
+	route /* {
+		# middleware declaration
+		din {
+			# middleware configurtion data, read by DinMiddleware.UnmarshalCaddyfile()
+			networks {
+				eth {
+				    methods web3_sha3 web3_clientVersion net_listening net_peerCount net_version eth_call eth_getBalance eth_estimateGas eth_createAccessList eth_getStorageAt eth_getCode eth_blockNumber eth_protocolVersion eth_syncing eth_sendRawTransaction eth_chainId eth_getLogs eth_getTransactionByHash eth_getTransactionReceipt eth_getTransactionCount eth_feeHistory eth_getBlockByNumber eth_getBlockByHash eth_gasPrice eth_getTransactionByBlockHashAndIndex eth_getTransactionByBlockNumberAndIndex eth_getBlockTransactionCountByNumber eth_getBlockTransactionCountByHash eth_getUncleCountByBlockNumber eth_getUncleCountByBlockHash eth_subscribe eth_unsubscribe eth_getUncleByBlockHashAndIndex eth_maxPriorityFeePerGas eth_getProof
+					providers {
+						https://eth.llamarpc.com:443 {
+							priority 0
+						}
+						https://ethereum-rpc.publicnode.com:443 {
+							priority 0
+						}
+						https://api.zan.top/eth-mainnet {
+							priority 0
+						}
+					}
+					chain_id eip155:0x1
+				}
+			}
+		}
+		# din reverse proxy directive configuration
+		# https://caddyserver.com/docs/caddyfile/directives/reverse_proxy
+		reverse_proxy {
+			lb_policy din_reverse_proxy_policy
+			transport http {
+				tls
+				keepalive 10s
+			}
+			dynamic din_reverse_proxy_policy
+			header_up Host {upstream_hostport}
+		}
+	}
+}

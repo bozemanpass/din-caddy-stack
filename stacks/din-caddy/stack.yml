@@ -2,11 +2,12 @@ version: "1.1"
 name: din-caddy
 description: "din-caddy"
 repos:
-  - github.com/DIN-center/din-caddy-plugins
-  - github.com/bozemanpass/din-caddy-stack
+  - bozemanpass/din-caddy-stack
 containers:
-  - bpi/din-caddy
+  - name: bpi/din-caddy
+    ref: bozemanpass/din-caddy-stack
+    path: container-build/bpi-din-caddy
 pods:
-  - name: din-caddy-stack
+  - name: din-caddy
     repository: bozemanpass/din-caddy-stack
     path: din-caddy
