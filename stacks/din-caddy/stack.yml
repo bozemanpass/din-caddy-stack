@@ -7,6 +7,6 @@ repos:
 containers:
   - bpi/din-caddy
 pods:
-  - name: din-caddy-stack
+  - name: din-caddy
     repository: bozemanpass/din-caddy-stack
     path: din-caddy

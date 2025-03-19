@@ -1,4 +1,5 @@
 # Copyright © 2023 Vulcanize
+# Copyright © 2025 Bozeman Pass, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -19,16 +20,20 @@ from pathlib import Path
 from shutil import copy
 
 
-def create(context, extra_args):
-    # Our goal here is just to copy the config file for act
+def create(deploy_cmd_ctx, deployment_ctx, stack, extra_args):
     #k8s
-    deployment_config_dir = context.deployment_dir.joinpath("configmaps",
-                                                            "din-caddy-config")
+    deployment_config_dir = deployment_ctx.deployment_dir.joinpath("configmaps", "din-caddy-config")
+
     #docker
     if not os.path.exists(deployment_config_dir):
-        deployment_config_dir = context.deployment_dir.joinpath("data",
-                                                                "din-caddy-config")
-    command_context = extra_args[2]
-    compose_file = [f for f in command_context.cluster_context.compose_files if "din-caddy" in f][0]
-    source_config_file = Path(compose_file).parent.joinpath("config", "Caddyfile")
-    copy(source_config_file, deployment_config_dir)
+        deployment_config_dir = deployment_ctx.deployment_dir.joinpath("data", "din-caddy-config")
+
+    compose_file = stack.get_pod_file_path("din-caddy")
+
+    # Choose the config file to use based on the broader spec we are a part of.
+    caddyfile = "Caddyfile.mainnet"
+    if "fixturenet-eth" in deployment_ctx.spec.get_pod_list():
+        caddyfile = "Caddyfile.fixturenet"
+
+    source_config_file = Path(compose_file).parent.joinpath("config", caddyfile)
+    copy(source_config_file, os.path.join(deployment_config_dir, "Caddyfile"))
