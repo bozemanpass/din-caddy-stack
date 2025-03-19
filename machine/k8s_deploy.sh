@@ -3,6 +3,7 @@
 STACK_NAME="din-caddy"
 STACK_DIN_REPO="bozemanpass/${STACK_NAME}-stack"
 STACK_FXETH_REPO="bozemanpass/fixturenet-eth-stack"
+STACK_FXETH_NAME="fixturenet-eth"
 STACK_HTTP_TARGET="din-caddy:8000"
 
 BPI_SCRIPT_DEBUG="${BPI_SCRIPT_DEBUG}"
@@ -13,9 +14,13 @@ IMAGE_REGISTRY_PASSWORD=""
 HTTP_PROXY_FQDN="${MACHINE_FQDN}"
 HTTP_PROXY_CLUSTER_ISSUER=""
 HTTP_PROXY_TARGET_SVC="$STACK_HTTP_TARGET"
+BUILD_POLICY="as-needed"
 
 while (( "$#" )); do
    case $1 in
+      --build-policy)
+         BUILD_POLICY="$1"||die
+         ;;
       --debug)
          BPI_SCRIPT_DEBUG="true"
          ;;
@@ -76,10 +81,10 @@ $STACK_CMD fetch-stack $STACK_DIN_REPO
 $STACK_CMD fetch-stack $STACK_FXETH_REPO
 
 $STACK_CMD --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME setup-repositories
-$STACK_CMD --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME prepare-containers --image-registry $IMAGE_REGISTRY --publish-images
+$STACK_CMD --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME prepare-containers --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY --publish-images
 
-$STACK_CMD --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_NAME setup-repositories
-$STACK_CMD --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_NAME prepare-containers --image-registry $IMAGE_REGISTRY --publish-images
+$STACK_CMD --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME setup-repositories
+$STACK_CMD --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME prepare-containers --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY --publish-images
 
 sudo chmod a+r /etc/rancher/k3s/k3s.yaml
 
@@ -104,7 +109,7 @@ $STACK_CMD \
       --image-registry $IMAGE_REGISTRY ${HTTP_PROXY_ARG}
 
 $STACK_CMD \
-  --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_NAME \
+  --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME \
   deploy \
     --deploy-to k8s \
     init \
@@ -115,7 +120,6 @@ $STACK_CMD \
 mkdir $HOME/deployments
 
 $STACK_CMD \
-  --stack ~/bpi/$(basename $STACK_REPO)/stacks/$STACK_NAME \
   deploy \
     create \
      --spec-file din.yml \
