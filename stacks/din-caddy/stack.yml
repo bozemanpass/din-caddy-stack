@@ -2,8 +2,7 @@ name: din-caddy
 description: "din-caddy"
 containers:
   - name: bpi/din-caddy
-    ref: bozemanpass/din-caddy-stack
-    path: container-build/bpi-din-caddy
+    ref: DIN-center/din-caddy-plugins
 pods:
   - name: din-caddy
     repository: bozemanpass/din-caddy-stack
