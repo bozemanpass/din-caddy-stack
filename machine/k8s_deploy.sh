@@ -77,14 +77,14 @@ fi
 
 docker login --username "$IMAGE_REGISTRY_USERNAME" --password "$IMAGE_REGISTRY_PASSWORD" $IMAGE_REGISTRY
 
-$STACK_CMD fetch-stack $STACK_DIN_REPO
-$STACK_CMD fetch-stack $STACK_FXETH_REPO
+$STACK_CMD fetch stack $STACK_DIN_REPO
+$STACK_CMD fetch stack $STACK_FXETH_REPO
 
-$STACK_CMD --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME setup-repositories
-$STACK_CMD --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME prepare-containers --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY --publish-images
+$STACK_CMD fetch repositories --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME
+$STACK_CMD build containers --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY --publish-images
 
-$STACK_CMD --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME setup-repositories
-$STACK_CMD --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME prepare-containers --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY --publish-images
+$STACK_CMD fetch repositories --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME
+$STACK_CMD build containers --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY --publish-images
 
 sudo chmod a+r /etc/rancher/k3s/k3s.yaml
 
@@ -100,19 +100,19 @@ else
 fi
 
 $STACK_CMD \
-  --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME \
-  deploy \
+  config \
     --deploy-to k8s \
     init \
+      --stack ~/bpi/$(basename $STACK_DIN_REPO)/stacks/$STACK_NAME \
       --output din.yml \
       --kube-config /etc/rancher/k3s/k3s.yaml \
       --image-registry $IMAGE_REGISTRY ${HTTP_PROXY_ARG}
 
 $STACK_CMD \
-  --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME \
-  deploy \
+  config \
     --deploy-to k8s \
     init \
+      --stack ~/bpi/$(basename $STACK_FXETH_REPO)/stacks/$STACK_FXETH_NAME \
       --output fxeth.yml \
       --kube-config /etc/rancher/k3s/k3s.yaml \
       --image-registry $IMAGE_REGISTRY
@@ -121,10 +121,9 @@ mkdir $HOME/deployments
 
 $STACK_CMD \
   deploy \
-    create \
      --spec-file din.yml \
      --spec-file fxeth.yml \
      --deployment-dir $HOME/deployments/$STACK_NAME
 
-$STACK_CMD deployment --dir $HOME/deployments/$STACK_NAME push-images
-$STACK_CMD deployment --dir $HOME/deployments/$STACK_NAME start
+$STACK_CMD manage --dir $HOME/deployments/$STACK_NAME push-images
+$STACK_CMD manage --dir $HOME/deployments/$STACK_NAME start
