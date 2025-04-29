@@ -5,5 +5,4 @@ containers:
     ref: DIN-center/din-caddy-plugins
 pods:
   - name: din-caddy
-    repository: bozemanpass/din-caddy-stack
     path: din-caddy
