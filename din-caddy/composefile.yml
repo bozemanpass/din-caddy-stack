@@ -7,7 +7,7 @@ services:
       - din-caddy-data:/srv
       - din-caddy-config:/etc/caddy:ro
     ports:
-      - 8000
+      - 8000 # @stack http-proxy
 
 volumes:
   din-caddy-data:
